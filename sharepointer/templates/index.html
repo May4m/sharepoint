@@ -36,7 +36,7 @@
       <div class="tab-content">
         <div id="signup">   
           <h1>Sign Up</h1>
-          <form onsubmit="return validateRegisterForm()" action="/share/register" name="registerForm" method="post">
+          <form onsubmit="return validateRegisterForm()" action="/share/register" name="registerForm" method="post">{% csrf_token %}
               <div class="top-row">
                 <div class="field-wrap">
                   <label>
@@ -61,28 +61,28 @@
                 <label>
                   Set A Password<span class="req">*</span>
                 </label>
-                <input type="password"required autocomplete="off" name="password1"/>
+                <input type="password"required autocomplete="off" name="password"/>
               </div>
               <div class="field-wrap">
                 <label>
                   Repeat Password<span class="req">*</span>
                 </label>
-                <input type="password"required autocomplete="off" name="password2"/>
+                <input type="password"required autocomplete="off" name="p2"/>
               </div>
               <button type="submit" class="button button-block"/>Get Started</button>
           </form>
         </div>
         <div id="login">   
           <h1>Sign in!</h1>
-          <form action="/share/login" method="post">
+          <form action="/share/login" method="post"> {% csrf_token %}
               <div class="field-wrap">
               <label>
                 Email Address<span class="req">*</span>
               </label>
-              <input type="email"required autocomplete="off"/>
+              <input type="email"required autocomplete="off" name="email"/>
             </div>
             <div class="field-wrap">
-              <label>
+              <label name="password">
                 Password<span class="req">*</span>
               </label>
               <input type="password"required autocomplete="off"/>
