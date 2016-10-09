@@ -2,7 +2,7 @@
 <html >
   <head>
     <meta charset="UTF-8">
-    <title>Sign-Up/Login Form</title>
+    <title>Procurement SharePoint</title>
     
     <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,300,600' rel='stylesheet' type='text/css'>
     <link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet">
@@ -22,12 +22,7 @@
     <div align="center">
       <br/>
       <h1 style="color:black">Procurement SharePoint a team file sharing system that lets users share files instantly</h1>
-      <h1 style="color:black">Procumenent SharePoint allows you to share file seamlesly without bottlenecks in real-time</h1>
-      <br/>
-      <img src="/static/images/static2.png" style="height:300px">
     </div>
-
-    <br/>
     <div class="form" id="register_login_modal">
       <ul class="tab-group">
         <li class="tab active"><a href="#signup">Sign Up</a></li>
@@ -36,7 +31,7 @@
       <div class="tab-content">
         <div id="signup">   
           <h1>Sign Up</h1>
-          <form onsubmit="return validateRegisterForm()" action="/share/register" name="registerForm" method="post">{% csrf_token %}
+          <form onsubmit="return validateRegisterForm()" action="/register" name="registerForm" method="post">{% csrf_token %}
               <div class="top-row">
                 <div class="field-wrap">
                   <label>
@@ -46,7 +41,7 @@
                 </div>
                 <div class="field-wrap">
                   <label>
-                    Last Name<span class="req">*</span>
+                    lastname<span class="req">*</span>
                   </label>
                   <input type="text"required autocomplete="off" name="lastname"/>
                 </div>
@@ -74,10 +69,10 @@
         </div>
         <div id="login">   
           <h1>Sign in!</h1>
-          <form action="/share/login" method="post"> {% csrf_token %}
+          <form action="/login" method="post"> {% csrf_token %}
               <div class="field-wrap">
               <label>
-                Email Address<span class="req">*</span>
+                email<span class="req">*</span>
               </label>
               <input type="email"required autocomplete="off" name="email"/>
             </div>
@@ -85,9 +80,9 @@
               <label name="password">
                 Password<span class="req">*</span>
               </label>
-              <input type="password"required autocomplete="off"/>
+              <input type="password"required autocomplete="off" name="password"/>
             </div>
-            <p class="forgot"><a href="#">Forgot Password?</a></p>
+            <p class="forgot"><a href="/forgotpassword">Forgot Password?</a></p>
             <button class="button button-block"/>Log In</button>
           </form>
         </div>
