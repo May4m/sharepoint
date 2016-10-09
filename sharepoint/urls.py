@@ -16,10 +16,9 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth import urls
-from django.contrib.auth import urls
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^share/', include('sharepointer.urls')),
+    url(r'^', include('sharepointer.urls')),
 ]

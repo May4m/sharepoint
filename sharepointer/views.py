@@ -41,6 +41,8 @@ class AuthCenter(object):
 
     @staticmethod
     def register(request):
+        if request.user.is_authenticated:
+            return HttpResponse('The User is already logged in... Cant register')
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = RegisterForm(request.POST)
@@ -81,6 +83,8 @@ class AuthCenter(object):
 
     @staticmethod
     def forgot_password(request):
+        if request.user.is_authenticated:
+            return HttpResponse('User already logged int')
         if request.method == 'GET':
             return render(request, "forgotpassword.html", {})
         elif request.method == 'POST':
