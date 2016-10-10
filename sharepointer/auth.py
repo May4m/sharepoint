@@ -15,13 +15,12 @@ from django.shortcuts import loader
 
 # setup email
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'codegeek77@gmail.com'
-SERVER_EMAIL = 'codegeek77@gmail.com'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'codegeek77@gmail.com'
-EMAIL_HOST_PASSWORD = 'sizwE123$'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_PASSWORD = 'sizweE$' #my gmail password
+EMAIL_HOST_USER = 'codegeek77@gmail.com' #my gmail username
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 def register_user(firstname, lastname, email, password):

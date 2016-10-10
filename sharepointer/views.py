@@ -90,7 +90,7 @@ class AuthCenter(object):
         elif request.method == 'POST':
             form = ResetPasswordForm(request.POST)
             if form.is_valid():
-                ForgotPasswordRequest.process_form(form, request)
+                return HttpResponse(AuthCenter.process_form(form, request))
             return HttpResponse('Invalid form')
         else:
             return HttpResponseServerError('Invalid method invoked %s' % request.method)
@@ -99,15 +99,25 @@ class AuthCenter(object):
     def process_form(form, request):
         cred = form.cleaned_data.get('email')
         if auth.reset_password(request, cred):
-            result = form.form_valid(form)
             messages.success(request, 'An email has been sent to ' + data + ". Please check its inbox to continue reseting password.")
-        else:
-            result = form.form_invalid(form)
-            messages.error(request, 'No user is associated with this email address')
-        return result
+            return "Reset mail sent"
+        messages.error(request, 'No user is associated with this email address')
+        return "Could not send mail"
 
     @staticmethod
     def does_user_exist(request):
         if auth.does_account_exist(request.GET['email']):
             return HttpResponse(json.dumps({'status': -1, 'message': 'Account already exitst'}))
         return HttpResponse(json.dumps({'status': 1, 'message': 'None'}))
+    
+    @staticmethod
+    def validate_login(request):
+        email = request.POST.get('email') or request.GET.get('email')
+        password = request.POST.get('password') or request.GET.get('password')
+        if request.user.is_authenticated:
+            return HttpResponse(json.dumps({'status': -1, 'message': 'User already logged'}))
+        if not (password or email):
+            return HttpResponse(json.dumps({'status': -1, 'message': 'Empty details entered'}))
+        if auth.authenticate_user(email, password):
+            return HttpResponse(json.dumps({'status': 1, 'message': 'successful'}))
+        return HttpResponse(json.dumps({'status': -1, 'message': 'Please check if your entered correct credentials'}))

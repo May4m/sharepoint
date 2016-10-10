@@ -48,7 +48,7 @@ function beforeLogin() {
     if (data.status == 200) {
       var response = JSON.parse(data.response);
       if (response['status'] != 1) {
-        alert("Login Failed! Check whether you entered correct crendentials");
+        alert(response['message']);
         returnvalue = false;
       }
     }
