@@ -13,6 +13,7 @@ from django.utils.encoding import force_bytes
 from django.shortcuts import loader
 
 
+
 # setup email
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -22,11 +23,29 @@ EMAIL_HOST_USER = 'codegeek77@gmail.com' #my gmail username
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+def send_validation_email(user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    c = {
+        'email': user.email,
+        'site_name': 'http://localhost:8000', 
+        'uid': uid,
+        'user': user,
+        'token': token,
+        'protocol': 'http',
+        'verify_link': 'http://localhost:8000/verifyaccount?cid=%s&email=%s' % (str(user.pk), user.email)
+        }
+    subject_template_name='validate_email_email.txt' 
+    mail = loader.render_to_string(subject_template_name, c)
+    send_mail("Procurement SharePoint", mail, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
+    return True
 
 def register_user(firstname, lastname, email, password):
     user = User.objects.create_user(email, email, password)
     user.first_name = firstname
     user.last_name = lastname
+    user.is_active = False
+    send_validation_email(user)
     user.save()
     return user
 
@@ -42,15 +61,15 @@ def change_password(email, oldpass, newpass):
 
 def authenticate_user(email, password):
     user = authenticate(username=email, password=password)
-    return user if user else False
+    return user if user.is_active else False
 
 
 def does_account_exist(email):
     try:
         user = User.objects.get(email=email)
-        return user
+        return user.is_active
     except User.DoesNotExist:
-        user = None
+        return False
 
 
 def reset_password(request, cred):

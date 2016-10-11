@@ -11,6 +11,7 @@ from django.shortcuts import render, loader
 
 from django.views.generic import *
 
+
 from forms import RegisterForm, LoginForm, ResetPasswordForm
 import auth
 
@@ -51,9 +52,9 @@ class AuthCenter(object):
             if form.is_valid():
                 get = form.cleaned_data.get
                 if not auth.does_account_exist(get('email')):
-                    auth.register_user(get('firstname'), get('lastname'), get('email'), get("password"))
-                    return HttpResponse('user succesfully registered')
-                return HttpResponse('User already registered' + get('username'))
+                    user = auth.register_user(get('firstname'), get('lastname'), get('email'), get("password"))
+                    return render(request, 'info.html', {'message': 'An email has been sent to your account please verify it'})
+                return render(request, 'oops.html', {'error_code': 100, 'message': 'account already exitst'})
             else:
                 return HttpResponse('Invalid form submitted')
         return HttpResponse('Invalid method for sensitive information')
@@ -65,15 +66,16 @@ class AuthCenter(object):
             if form.is_valid():
                 email = form.cleaned_data.get('email')
                 password = form.cleaned_data.get('password')
-                print email, password
+                if not auth.does_account_exist(email):
+                    return render(request, "oops.html", {'error_code': 100, 'message': 'Account does not exist'})
                 user = auth.authenticate_user(email, password)
                 if user:
                     auth.login(request, user)
-                    return HttpResponse('User successfuly logged in')
+                    return HttpResponseRedirect('/home')
                 return HttpResponse("{status: -200, message: 'authentication error''}")
             else:
                 return HttpResponse('<h1>Invalid form submitted</h1<')
-        return HttpResponseServerError('<h1>Invalid method for sensitive information')
+        return HttpResponseRedirect('/')
 
     @staticmethod
     def logout(request):
@@ -91,7 +93,7 @@ class AuthCenter(object):
         elif request.method == 'POST':
             form = ResetPasswordForm(request.POST)
             if form.is_valid():
-                return HttpResponse(AuthCenter.process_form(form, request))
+                return AuthCenter.process_form(form, request)
             return HttpResponse('Invalid form')
         else:
             return HttpResponseServerError('Invalid method invoked %s' % request.method)
@@ -99,9 +101,11 @@ class AuthCenter(object):
     @staticmethod
     def process_form(form, request):
         cred = form.cleaned_data.get('email')
+        if auth.does_account_exist(cred):
+            return render(request, 'oops.html', {'error_code': 100, 'message': 'Account does not exist'})
         if auth.reset_password(request, cred):
             messages.success(request, 'An email has been sent to ' + cred + ". Please check its inbox to continue reseting password.")
-            return render(request, 'oops.html', {'error_code': '', 'message': 'Reset email sent'})
+            return render(request, 'info.html', {'message': 'password reset email sent'})
         messages.error(request, 'No user is associated with this email address')
         return render(request, 'oops.html', {'error_code': '500', 'message': 'could not send reset email'})
 
@@ -146,3 +150,18 @@ class AuthCenter(object):
             user.set_password(password)
             user.save()
             return render(request, 'info.html', {'message': 'Your password has been changed'})
+    
+    @staticmethod
+    def verify_account(request):
+        email = request.GET.get('email')
+        cid = request.GET.get('cid')
+        if not (email or cid):
+            return render(request, 'info.html', {'message': 'could not verify account'})
+        user = User.objects.get(pk=cid)
+        if not user:
+            return render(request, 'info.html', {'message': 'could not verify account'})
+        user.is_active = True
+        user.save()
+        if user:
+            auth.login(request, user)
+        return HttpResponseRedirect('/home')

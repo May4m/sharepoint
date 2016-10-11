@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+
 class FileEntity(models.Model):
-    owner = models.ForeignKey(User)
-    file = models.FileField(upload_to='/documents')
-    upload_date = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='/uploads')
+    date_uploaded = models.DateTimeField(auto_now_add=True)
