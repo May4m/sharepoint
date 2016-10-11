@@ -41,17 +41,20 @@ Checks whether the entered account is valid without errors, beforeLogin
 procceding to login
 */
 function beforeLogin() {
-  var email = document.form['loginForm']['email'].value;
-  var password = document.form['loginForm']['password'].value;
-  var returnvalue = true;
+  var email = document.forms["loginForm"]["email"].value;
+  var password = document.forms["loginForm"]["password"].value;
+  var returnvalue = false;
+
   var fetch = url_fetch('/validate_login?email=' + email + "&password=" + password, function(data){
     if (data.status == 200) {
       var response = JSON.parse(data.response);
-      if (response['status'] != 1) {
+      if (response['status'] == 1)
+        returnvalue = true;
+      else
         alert(response['message']);
-        returnvalue = false;
-      }
+      console.info(response['message']);
     }
-  });
+  }, "GET");
+  fetch.send();
   return returnvalue;
 }

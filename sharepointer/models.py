@@ -10,3 +10,4 @@ from django.contrib.auth.models import User
 class FileEntity(models.Model):
     file = models.FileField(upload_to='/uploads')
     date_uploaded = models.DateTimeField(auto_now_add=True)
+    no_of_times_views = models.IntegerField(default=0, editable=False)

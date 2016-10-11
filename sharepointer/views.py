@@ -72,7 +72,7 @@ class AuthCenter(object):
                 if user:
                     auth.login(request, user)
                     return HttpResponseRedirect('/home')
-                return HttpResponse("{status: -200, message: 'authentication error''}")
+                return HttpResponse(json.dumps({'status': -200, 'message': 'authentication error'}))
             else:
                 return HttpResponse('<h1>Invalid form submitted</h1<')
         return HttpResponseRedirect('/')
@@ -101,7 +101,7 @@ class AuthCenter(object):
     @staticmethod
     def process_form(form, request):
         cred = form.cleaned_data.get('email')
-        if auth.does_account_exist(cred):
+        if not auth.does_account_exist(cred):
             return render(request, 'oops.html', {'error_code': 100, 'message': 'Account does not exist'})
         if auth.reset_password(request, cred):
             messages.success(request, 'An email has been sent to ' + cred + ". Please check its inbox to continue reseting password.")

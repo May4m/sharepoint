@@ -61,13 +61,15 @@ def change_password(email, oldpass, newpass):
 
 def authenticate_user(email, password):
     user = authenticate(username=email, password=password)
-    return user if user.is_active else False
+    if user:
+        return user if user.is_active else False
+    return False
 
 
 def does_account_exist(email):
     try:
         user = User.objects.get(email=email)
-        return user.is_active
+        return user if user.is_active else False
     except User.DoesNotExist:
         return False
 

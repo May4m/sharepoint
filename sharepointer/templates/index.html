@@ -69,18 +69,18 @@
         </div>
         <div id="login">   
           <h1>Sign in!</h1>
-          <form action="/login" method="post"> {% csrf_token %}
+          <form onsubmit="return beforeLogin()" action="/login" name="loginForm" method="post"> {% csrf_token %}
               <div class="field-wrap">
               <label>
                 email<span class="req">*</span>
               </label>
-              <input type="email"required autocomplete="off" name="email"/>
+              <input type="email" required autocomplete="off" name="email"/>
             </div>
             <div class="field-wrap">
               <label name="password">
                 Password<span class="req">*</span>
               </label>
-              <input type="password"required autocomplete="off" name="password"/>
+              <input type="password" required autocomplete="off" name="password"/>
             </div>
             <p class="forgot"><a href="/forgotpassword">Forgot Password?</a></p>
             <button class="button button-block"/>Log In</button>
