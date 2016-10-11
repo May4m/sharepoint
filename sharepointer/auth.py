@@ -29,7 +29,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 def send_validation_email(user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-    c = {
+    params = {
         'email': user.email,
         'site_name': 'http://localhost:8000', 
         'uid': uid,
@@ -39,7 +39,7 @@ def send_validation_email(user):
         'verify_link': 'http://localhost:8000/verifyaccount?cid=%s&email=%s' % (str(user.pk), user.email)
         }
     subject_template_name='validate_email_email.txt' 
-    mail = loader.render_to_string(subject_template_name, c)
+    mail = loader.render_to_string(subject_template_name, params)
     send_mail("Procurement SharePoint", mail, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
     return True
 
@@ -83,7 +83,7 @@ def reset_password(request, cred):
         return False
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-    c = {
+    params = {
         'email': user.email,
         'domain': request.META['HTTP_HOST'],
         'site_name': 'your site', 
@@ -95,8 +95,8 @@ def reset_password(request, cred):
         }
     subject_template_name='password_reset_subject.txt' 
     email_template_name='password_reset_email.html'    
-    subject = loader.render_to_string(subject_template_name, c)
+    subject = loader.render_to_string(subject_template_name, params)
     subject = ''.join(subject.splitlines())
-    email = loader.render_to_string(email_template_name, c)
+    email = loader.render_to_string(email_template_name, params)
     send_mail(subject, email, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
     return True

@@ -1,6 +1,7 @@
 
 from threading import Thread
 
+
 def async(function):
     def decorator(*args, **kwargs):
         t = Thread(target=function, args=args, kwargs=kwargs)
