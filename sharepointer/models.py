@@ -9,4 +9,4 @@ from django.contrib.auth.models import User
 class FileEntity(models.Model):
     owner = models.ForeignKey(User)
     file = models.FileField(upload_to='/documents')
-    upload_date = models.DateTimeField()
+    upload_date = models.DateTimeField(auto_now_add=True)
