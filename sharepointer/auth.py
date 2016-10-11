@@ -12,6 +12,8 @@ from django.utils.encoding import force_bytes
 
 from django.shortcuts import loader
 
+from .jobs import async
+
 
 
 # setup email
@@ -23,6 +25,7 @@ EMAIL_HOST_USER = 'codegeek77@gmail.com' #my gmail username
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+@async
 def send_validation_email(user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
@@ -73,7 +76,7 @@ def does_account_exist(email):
     except User.DoesNotExist:
         return False
 
-
+@async
 def reset_password(request, cred):
     user = does_account_exist(cred)
     if not user:
