@@ -28,7 +28,7 @@ def index(request):
 @login_required(login_url='/')
 def home(request):
     if request.user.is_authenticated:
-        return HttpResponse('Welcome to the home Page %s' % request.user.email)
+        return render(request, 'home.html', {'username': request.user.first_name})
     return HttpResponseRedirect('/')
 
 
