@@ -55,21 +55,24 @@ def does_account_exist(email):
 
 def reset_password(request, cred):
     user = does_account_exist(cred)
-    if user:
-        c = {
-            'email': user.email,
-            'domain': request.META['HTTP_HOST'],
-            'site_name': 'your site',
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'user': user,
-            'token': default_token_generator.make_token(user),
-            'protocol': 'http',
-            }
-        subject_template_name='password_reset_subject.txt' 
-        email_template_name='password_reset_email.html'    
-        subject = loader.render_to_string(subject_template_name, c)
-        subject = ''.join(subject.splitlines())
-        email = loader.render_to_string(email_template_name, c)
-        send_mail(subject, email, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
-        return True
-    return False
+    if not user:
+        return False
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    c = {
+        'email': user.email,
+        'domain': request.META['HTTP_HOST'],
+        'site_name': 'your site', 
+        'uid': uid,
+        'user': user,
+        'token': token,
+        'protocol': 'http',
+        'reset_link': 'http://localhost:8000/changepassword?uid=%s&pk=%s&token=%s' % (str(uid), str(user.pk), str(uid))
+        }
+    subject_template_name='password_reset_subject.txt' 
+    email_template_name='password_reset_email.html'    
+    subject = loader.render_to_string(subject_template_name, c)
+    subject = ''.join(subject.splitlines())
+    email = loader.render_to_string(email_template_name, c)
+    send_mail(subject, email, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
+    return True

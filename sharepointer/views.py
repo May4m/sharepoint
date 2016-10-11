@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -99,10 +100,10 @@ class AuthCenter(object):
     def process_form(form, request):
         cred = form.cleaned_data.get('email')
         if auth.reset_password(request, cred):
-            messages.success(request, 'An email has been sent to ' + data + ". Please check its inbox to continue reseting password.")
-            return "Reset mail sent"
+            messages.success(request, 'An email has been sent to ' + cred + ". Please check its inbox to continue reseting password.")
+            return render(request, 'oops.html', {'error_code': '', 'message': 'Reset email sent'})
         messages.error(request, 'No user is associated with this email address')
-        return "Could not send mail"
+        return render(request, 'oops.html', {'error_code': '500', 'message': 'could not send reset email'})
 
     @staticmethod
     def does_user_exist(request):
@@ -121,3 +122,27 @@ class AuthCenter(object):
         if auth.authenticate_user(email, password):
             return HttpResponse(json.dumps({'status': 1, 'message': 'successful'}))
         return HttpResponse(json.dumps({'status': -1, 'message': 'Please check if your entered correct credentials'}))
+
+    @staticmethod
+    def change_password(request):
+        if request.user.is_authenticated:
+            return render(request, "oops.html", {'error_code': 500, 'message': 'user already logged in'})
+        if request.method == 'GET':
+            token = request.GET.get('token')
+            uid = request.GET.get('uid')
+            pk = request.GET.get('pk')
+            if not (token or uid or pk):
+                return render(request, "oops.html", {'error_code': 500, 'message': 'An error occured'})
+            user = User.objects.get(pk=pk)
+            if user is None:
+                return render(request, "oops.html", {'error_code': 500, 'message': 'we working on it'})
+            return render(request, 'change_password_form.html', {'cid': str(user.pk)})
+        elif request.method == "POST":
+            password = request.POST.get('password')
+            cid = request.POST.get('cid')
+            user = User.objects.get(pk=cid)
+            if not user:
+                return render(request, 'oops.html', {'error_code': 500, 'message': 'invalid token'})
+            user.set_password(password)
+            user.save()
+            return render(request, 'info.html', {'message': 'Your password has been changed'})
