@@ -38,7 +38,7 @@ def send_validation_email(user):
         'protocol': 'http',
         'verify_link': 'http://localhost:8000/verifyaccount?cid=%s&email=%s' % (str(user.pk), user.email)
         }
-    subject_template_name='validate_email_email.txt' 
+    subject_template_name = 'validate_email_email.txt' 
     mail = loader.render_to_string(subject_template_name, params)
     send_mail("Procurement SharePoint", mail, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
     return True
@@ -76,7 +76,7 @@ def does_account_exist(email):
     except User.DoesNotExist:
         return False
 
-@async
+
 def reset_password(request, cred):
     user = does_account_exist(cred)
     if not user:
