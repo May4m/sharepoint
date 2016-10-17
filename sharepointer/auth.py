@@ -12,8 +12,7 @@ from django.utils.encoding import force_bytes
 
 from django.shortcuts import loader
 
-from .jobs import async
-
+import jobs
 
 
 # setup email
@@ -25,7 +24,7 @@ EMAIL_HOST_USER = 'codegeek77@gmail.com' #my gmail username
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-@async
+@jobs.async
 def send_validation_email(user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
@@ -98,5 +97,6 @@ def reset_password(request, cred):
     subject = loader.render_to_string(subject_template_name, params)
     subject = ''.join(subject.splitlines())
     email = loader.render_to_string(email_template_name, params)
-    send_mail(subject, email, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
+    # send email on another thread to avoid loading
+    jobs.new_job(send_mail, subject, email, DEFAULT_FROM_EMAIL , [user.email], fail_silently=False)
     return True

@@ -1,6 +1,6 @@
 
 from threading import Thread
-
+import thread
 
 def async(function):
     def decorator(*args, **kwargs):
@@ -8,3 +8,7 @@ def async(function):
         t.daemon = True
         t.start()
     return decorator
+
+
+def new_job(function, *args, **kwargs):
+    thread.start_new_thread(function, args, kwargs)
