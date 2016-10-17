@@ -15,5 +15,6 @@ urlpatterns = [
     url(r'^verifyaccount', views.AuthCenter.verify_account, name='verify_account'),
     url(r'^does_user_exist', views.AuthCenter.does_user_exist),
     url(r'^home', views.home, name="home"),
+    url(r'^sendfile', views.FileSharingCenter.send_file, name="send_file")
 
 ]

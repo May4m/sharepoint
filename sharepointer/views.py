@@ -53,6 +53,7 @@ class AuthCenter(object):
                 get = form.cleaned_data.get
                 if not auth.does_account_exist(get('email')):
                     user = auth.register_user(get('firstname'), get('lastname'), get('email'), get("password"))
+                    messages.success("A new user has been registered")
                     return render(request, 'info.html', {'message': 'An email has been sent to your account please verify it'})
                 return render(request, 'oops.html', {'error_code': 100, 'message': 'account already exitst'})
             else:
@@ -104,9 +105,8 @@ class AuthCenter(object):
         if not auth.does_account_exist(cred):
             return render(request, 'oops.html', {'error_code': 100, 'message': 'Account does not exist'})
         if auth.reset_password(request, cred):
-            messages.success(request, 'An email has been sent to ' + cred + ". Please check its inbox to continue reseting password.")
+            messages.success(request, 'An reset email has been sent to' + cred)
             return render(request, 'info.html', {'message': 'password reset email sent'})
-        messages.error(request, 'No user is associated with this email address')
         return render(request, 'oops.html', {'error_code': '500', 'message': 'could not send reset email'})
 
     @staticmethod
@@ -165,3 +165,17 @@ class AuthCenter(object):
         if user:
             auth.login(request, user)
         return HttpResponseRedirect('/home')
+
+    
+class FileSharingCenter(object):
+
+    @staticmethod
+    #@login_required(login_url='/')
+    def send_file(request):
+        if request.method == "GET":
+            print User.objects.all()
+            return render(request, "send_file_form.html", {'users': User.objects.all()})
+        elif request.method == "POST":
+            print request.POST.get("file")
+            print request.POST.get("recipient")
+            return HttpResponse("Yes");
