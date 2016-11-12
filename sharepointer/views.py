@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 
+from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -9,14 +10,17 @@ from django.contrib import messages
 
 from django.shortcuts import render, loader
 
+from django.core.files.storage import FileSystemStorage
+
 from django.views.generic import *
 
-
-from forms import RegisterForm, LoginForm, ResetPasswordForm
+from forms import RegisterForm, LoginForm, ResetPasswordForm, UploadForm
 import auth
 
 import json
 import threading
+import dbgate
+import models
 
 # Create your views here.
 
@@ -28,9 +32,9 @@ def index(request):
 
 @login_required(login_url='/')
 def home(request):
-    if request.user.is_authenticated:
-        return render(request, 'home.html', {'username': request.user.first_name})
-    return HttpResponseRedirect('/')
+    sent = dbgate.get_all_sent_files(request.user)
+    received = dbgate.get_all_received_files(request.user)
+    return render(request, 'home.html', {'username': request.user.first_name, 'sent_files': sent, 'received_files': received})
 
 
 class AuthCenter(object):
@@ -170,12 +174,65 @@ class AuthCenter(object):
 class FileSharingCenter(object):
 
     @staticmethod
-    #@login_required(login_url='/')
+    @login_required(login_url='/')
     def send_file(request):
         if request.method == "GET":
-            print User.objects.all()
             return render(request, "send_file_form.html", {'users': User.objects.all()})
         elif request.method == "POST":
-            print request.POST.get("file")
-            print request.POST.get("recipient")
-            return HttpResponse("Yes");
+            content = request.POST.get('content')
+            filename = request.POST.get('filename')
+            to = request.POST.get('to')
+            dbgate.upload_file(request.user, to, filename, content)
+        return HttpResponse("form")
+
+    @staticmethod
+    @login_required(login_url='/')
+    def delete_file(request):
+        oid = request.GET.get('uid')
+        section = request.GET('section')
+        dbgate.delete_file(oid, section)
+        return HttpResponse({'{"success": true}'})
+    
+    @staticmethod
+    @login_required(login_url='/')
+    def download_file(request):
+        oid = request.GET.get('uid')
+        section = request.GET.get('section')
+        if oid is None or section is None:
+            return HttpResponse("Could not download file")
+        return dbgate.download_file(oid, section)
+
+    @staticmethod
+    @login_required(login_url='/')
+    def edit_file(request):
+        oid = request.GET.get('uid')
+        section = request.GET.get('section')
+        print oid, section
+        if section == "sent":
+            obj = models.SentFiles.objects.get(pk=int(oid)).file
+            file = obj.file_content
+            uid = obj.pk
+        else:
+            file = ""
+            uid = '0'
+        return render(request, "edit.html", {'username': request.user.first_name, 'code': file, 'file_id': uid})
+
+    @staticmethod
+    @login_required(login_url='/')
+    def update_file(request):
+        uid = request.POST.get('uid')
+        content = request.POST.get('content')
+        if uid and content:
+            dbgate.update_file(int(uid), str(content))
+            return HttpResponse("{'success': true}")
+        return HttpResponse("{'success': false}")
+
+    @staticmethod
+    @login_required(login_url='/')
+    def get_file(request):
+        uid = request.GET.get('uid')
+        obj = models.CentralFileStore.objects.get(pk=int(uid))
+        status = {'content': ''}
+        if obj:
+            status['content'] = obj.file_content
+        return HttpResponse(json.dumps(status))

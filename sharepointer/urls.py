@@ -15,6 +15,11 @@ urlpatterns = [
     url(r'^verifyaccount', views.AuthCenter.verify_account, name='verify_account'),
     url(r'^does_user_exist', views.AuthCenter.does_user_exist),
     url(r'^home', views.home, name="home"),
-    url(r'^sendfile', views.FileSharingCenter.send_file, name="send_file")
+    url(r'^sendfile', views.FileSharingCenter.send_file, name="send_file"),
+    url(r'^deletefile', views.FileSharingCenter.delete_file),
+    url(r'^downloadfile', views.FileSharingCenter.download_file),
+    url(r'^editfile', views.FileSharingCenter.edit_file),
+    url(r'^updatefile', views.FileSharingCenter.update_file),
+    url(r'getfile', views.FileSharingCenter.get_file)
 
 ]

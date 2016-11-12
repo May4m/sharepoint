@@ -17,3 +17,8 @@ class LoginForm(forms.Form):
 
 class ResetPasswordForm(forms.Form):
     email = forms.CharField(label=("email"), max_length=254)
+
+
+class UploadForm(forms.Form):
+    doc = forms.FileField(label='Select a file')
+    to = forms.CharField()

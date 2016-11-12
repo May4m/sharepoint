@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-from .models import SentFile, ReceivedFile
+from .models import CentralFileStore, SentFiles
 # Register your models here.
 
-admin.site.register([SentFile, ReceivedFile])
+admin.site.register([CentralFileStore, SentFiles])

@@ -109,5 +109,5 @@ else:
             return (ret == 0)
 
         def unlock(f):
-            ret = fcntl.flock(_fd(f), fcntl.LOCK_UN)
+            ret = fcntl.lockf(_fd(f), fcntl.LOCK_UN)
             return (ret == 0)
