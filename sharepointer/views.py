@@ -34,7 +34,9 @@ def index(request):
 def home(request):
     sent = dbgate.get_all_sent_files(request.user)
     received = dbgate.get_all_received_files(request.user)
-    return render(request, 'home.html', {'username': request.user.first_name, 'sent_files': sent, 'received_files': received})
+    return render(request, 'home.html', {'username': request.user.first_name,
+     'sent_files': sent, 'received_files': received,
+     'no_of_files_sent': len(sent), 'no_of_files_received': len(received)})
 
 
 class AuthCenter(object):

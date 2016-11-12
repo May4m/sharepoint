@@ -89,6 +89,7 @@
         <ul>
             <li><a class="active" href="/">Home</a></li>
             <li><a class="active" href="/logout">Logout</a></li>
+            <li><a class="active" href="/sendfile">View Profile</a></li>
             <li><a class="active" href="/sendfile">Send File</a></li>
         </ul>
 
@@ -96,8 +97,8 @@
         <br/>
 
         <div style="background-color: #F5F3EE">
-            <h3 style="font-family:'PT Sans Narrow', sans-serif;font-size: 20px">Number of files Sent: 2329</h3>
-            <h3 style="font-family:'PT Sans Narrow', sans-serif;font-size: 20px">Number of files Received: 232</h3>
+            <h3 style="font-family:'PT Sans Narrow', sans-serif;font-size: 20px">Number of files Sent: {{ no_of_files_sent }}</h3>
+            <h3 style="font-family:'PT Sans Narrow', sans-serif;font-size: 20px">Number of files Received: {{ no_of_files_received }}</h3>
         </div>
         
         <div style="background-color: #aaa">
