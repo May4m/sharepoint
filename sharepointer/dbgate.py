@@ -34,6 +34,18 @@ def get_all_sent_files(user):
 	return user.sentfiles_set.all()
 
 
+def delete_file(oid, section):
+	oid = int(oid)
+	if section == "received":
+		file = models.CentralFileStore.objects.get(pk=oid)
+		file.delete()
+	elif section == "sent":
+		sent = models.SentFiles.objects.get(pk=oid)
+		file = sent.file
+		sent.delete()
+		file.delete()
+
+
 def download_file(oid, section):
 	oid = int(oid)
 	if section == "received":

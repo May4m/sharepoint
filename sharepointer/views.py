@@ -35,8 +35,8 @@ def home(request):
     sent = dbgate.get_all_sent_files(request.user)
     received = dbgate.get_all_received_files(request.user)
     return render(request, 'home.html', {'username': request.user.first_name,
-     'sent_files': sent, 'received_files': received,
-     'no_of_files_sent': len(sent), 'no_of_files_received': len(received)})
+            'sent_files': sent, 'received_files': received,
+            'no_of_files_sent': len(sent), 'no_of_files_received': len(received)})
 
 
 class AuthCenter(object):
@@ -191,7 +191,7 @@ class FileSharingCenter(object):
     @login_required(login_url='/')
     def delete_file(request):
         oid = request.GET.get('uid')
-        section = request.GET('section')
+        section = request.GET.get('section')
         dbgate.delete_file(oid, section)
         return HttpResponse({'{"success": true}'})
     
@@ -209,14 +209,14 @@ class FileSharingCenter(object):
     def edit_file(request):
         oid = request.GET.get('uid')
         section = request.GET.get('section')
-        print oid, section
         if section == "sent":
             obj = models.SentFiles.objects.get(pk=int(oid)).file
             file = obj.file_content
             uid = obj.pk
         else:
-            file = ""
-            uid = '0'
+            obj = models.CentralFileStore.objects.get(pk=int(oid))
+            file = obj.file_content
+            uid = obj.pk
         return render(request, "edit.html", {'username': request.user.first_name, 'code': file, 'file_id': uid})
 
     @staticmethod
