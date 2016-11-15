@@ -59,7 +59,7 @@ class AuthCenter(object):
                 get = form.cleaned_data.get
                 if not auth.does_account_exist(get('email')):
                     user = auth.register_user(get('firstname'), get('lastname'), get('email'), get("password"))
-                    messages.success("A new user has been registered")
+                    messages.success(request, "A new user has been registered")
                     return render(request, 'info.html', {'message': 'An email has been sent to your account please verify it'})
                 return render(request, 'oops.html', {'error_code': 100, 'message': 'account already exitst'})
             else:
