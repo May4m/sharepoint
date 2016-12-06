@@ -35,24 +35,42 @@ function edit_sent_file(id, filename) {
 }
 
 
-function download_received_file(id) {
-	window.location = "/downloadfile?section=received&uid=" + String(id);
+function download_received_file(id, is_edit=false) {
+	if (is_edit) {
+		window.location = "/downloadfile?section=edited&uid=" + String(id);
+	} else {
+		window.location = "/downloadfile?section=received&uid=" + String(id);
+	}
 }
 
 
-function delete_received_file(id) {
-	var req = url_fetch('/deletefile?section=received&uid=' + String(id), function(e){
+function delete_received_file(id, is_edit=false) {
+	if (is_edit){
+		var url = '/deletefile?section=edited&uid=' + String(id)
+	} else {
+		var url = '/deletefile?section=received&uid=' + String(id);
+	}
+	var req = url_fetch(url, function(e){
 		if (e.status == 200 || e.status == 0) {
 			window.location = '/';
 		} else {
 			alert("Could not delete file");
 		}
-	}, 'GET', true);
+	}, 'GET', false);
 	req.send();
 }
 
 function edit_received_file(id, filename) {
 	var win = window.open("/editfile?section=received&uid=" + String(id), filename,
+				"width=1200,height=700");
+
+	var x = screen.width/2 - 1200/2;
+    var y = screen.height/2 - 700/2;
+	win.moveTo(x, y);
+}
+
+function edit_received_file(id, filename) {
+	var win = window.open("/editfile?editing=1section=received&uid=" + String(id), filename,
 				"width=1200,height=700");
 
 	var x = screen.width/2 - 1200/2;

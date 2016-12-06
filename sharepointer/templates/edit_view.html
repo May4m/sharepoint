@@ -200,6 +200,7 @@
 			var formData = new FormData();
 			formData.append("content", myTextArea.value);
 			formData.append("uid", dbID);
+			formData.append("lobby", 1);
 	
 			// send data to server
 			var req = url_fetch("/hard_edit_file", function(){}, "POST", true);

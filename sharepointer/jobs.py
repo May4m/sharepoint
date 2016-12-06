@@ -1,5 +1,5 @@
 
-from threading import Thread
+from threading import Thread, Timer
 import thread
 
 
@@ -13,3 +13,9 @@ def async(function):
 
 def new_job(function, *args, **kwargs):
     thread.start_new_thread(function, args, kwargs)
+
+
+def job_schedular(function, time):
+    schedular = Timer(function, time)
+    schedular.start()
+    return schedular

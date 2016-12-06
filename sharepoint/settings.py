@@ -11,9 +11,11 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
 import os
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
@@ -26,7 +28,7 @@ SECRET_KEY = 'n!i0m^fz_s)h8rh&1%j@7vq*!vs)=a$_)-7$cy^bu#hkku556@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://procurement-sharepoint.herokuapp.com"]
 
 
 # Application definition
@@ -87,19 +89,8 @@ DATABASES = {
     }
 }
 
+DATABASES['default'] =  dj_database_url.config()
 
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'SharePoint',
-        'USER': 'root',
-        'PASSWORD': 'sizwe123',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-        'PORT': '3307',
-    }
-}
-'''
 
 
 
@@ -136,16 +127,32 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/dev/howto/static-files/
+# Update database configuration with $DATABASE_URL.
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
 
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+ALLOWED_HOSTS = ['*']
+
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_URL = '/static/'
+
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_ROOT, 'static'),
+)
+
+# Simplified static file serving.
+# https://warehouse.python.org/project/whitenoise/
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_PASSWORD = 'sizwE123$' #my gmail password
-EMAIL_HOST_USER = 'codegeek77@gmail.com' #my gmail username
+EMAIL_HOST_PASSWORD = 'mamba123$' #my gmail password
+EMAIL_HOST_USER = 'cebileellen@gmail.com' #my gmail username
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

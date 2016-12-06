@@ -12,11 +12,11 @@ from django.contrib.auth.models import User
 
 class CentralFileStore(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    file_name = models.CharField(max_length=50)
+    file_name = models.CharField(max_length=100, null=True)
     file_content = models.TextField()
-    upload_date = models.DateTimeField(auto_now_add=True)
+    upload_date = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.BooleanField(default=False)
-    recipients = models.CharField(max_length=300, default="[]")
+    recipients = models.CharField(max_length=900, default="[]", null=True)
 
     def set_recipients(self, x):
         self.recipients = json.dumps(x)
@@ -30,6 +30,18 @@ class CentralFileStore(models.Model):
         self.set_recipients(users)
 
 
+class EditedFiles(models.Model):
+    file_name = models.CharField(max_length=100, null=True)
+    file_content = models.TextField()
+    edit_date = models.DateTimeField(auto_now_add=True, null=True)
+    edited_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+
+
 class SentFiles(models.Model):
-    user = models.ForeignKey(User)
-    file = models.ForeignKey(CentralFileStore)
+    user = models.ForeignKey(User, null=True)
+    file = models.ForeignKey(CentralFileStore, null=True)
+
+
+class Notifications(models.Model):
+    message = models.CharField(max_length=1000, null=True)
+    file = models.ForeignKey(CentralFileStore, null=True)

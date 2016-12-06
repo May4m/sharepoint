@@ -19,7 +19,8 @@ urlpatterns = [
     url(r'^deletefile', views.FileSharingCenter.delete_file),
     url(r'^downloadfile', views.FileSharingCenter.download_file),
     url(r'^editfile', views.FileSharingCenter.edit_file),
+    url(r'^hard_edit_file', views.FileSharingCenter.hard_edit),
     url(r'^updatefile', views.FileSharingCenter.update_file),
-    url(r'getfile', views.FileSharingCenter.get_file)
-
+    url(r'^getfile', views.FileSharingCenter.get_file),
+    url(r'^get_notifications', views.FileSharingCenter.get_notifications)
 ]

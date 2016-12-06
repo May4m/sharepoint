@@ -19,8 +19,8 @@ import jobs
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_PASSWORD = 'sizweE$' #my gmail password
-EMAIL_HOST_USER = 'codegeek77@gmail.com' #my gmail username
+EMAIL_HOST_PASSWORD = 'mamba123$' #my gmail password
+EMAIL_HOST_USER = 'cebileellen@gmail.com' #my gmail username
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -30,12 +30,12 @@ def send_validation_email(user):
     token = default_token_generator.make_token(user)
     params = {
         'email': user.email,
-        'site_name': 'http://localhost:8000', 
+        'site_name': 'https://procurement-sharepoint.herokuapp.com', 
         'uid': uid,
         'user': user,
         'token': token,
         'protocol': 'http',
-        'verify_link': 'http://localhost:8000/verifyaccount?cid=%s&email=%s' % (str(user.pk), user.email)
+        'verify_link': 'https://procurement-sharepoint.herokuapp.com/verifyaccount?cid=%s&email=%s' % (str(user.pk), user.email)
         }
     subject_template_name = 'validate_email_email.txt' 
     mail = loader.render_to_string(subject_template_name, params)
@@ -46,7 +46,7 @@ def register_user(firstname, lastname, email, password):
     user = User.objects.create_user(email, email, password)
     user.first_name = firstname
     user.last_name = lastname
-    user.is_active = False
+    user.is_active = True  # must be changed to false
     send_validation_email(user)
     user.save()
     return user
@@ -68,10 +68,17 @@ def authenticate_user(email, password):
     return False
 
 
+def get_user_by_email():
+    user = User.objects.get(email=email)
+    return user
+    
+
 def does_account_exist(email):
     try:
         user = User.objects.get(email=email)
-        return user if user.is_active else False
+        if user:
+            return user if user.is_active else False
+        return False
     except User.DoesNotExist:
         return False
 
@@ -90,7 +97,7 @@ def reset_password(request, cred):
         'user': user,
         'token': token,
         'protocol': 'http',
-        'reset_link': 'http://localhost:8000/changepassword?uid=%s&pk=%s&token=%s' % (str(uid), str(user.pk), str(uid))
+        'reset_link': 'https://procurement-sharepoint.herokuapp.com/changepassword?uid=%s&pk=%s&token=%s' % (str(uid), str(user.pk), str(uid))
         }
     subject_template_name='password_reset_subject.txt' 
     email_template_name='password_reset_email.html'    

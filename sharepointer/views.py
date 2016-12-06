@@ -18,11 +18,15 @@ from forms import RegisterForm, LoginForm, ResetPasswordForm, UploadForm
 import auth
 
 import json
-import threading
 import dbgate
 import models
 
 # Create your views here.
+
+
+def HttpJsonResponse(data):
+    return HttpResponse(json.dumps(data))
+
 
 def index(request):
     if request.user.is_authenticated:
@@ -32,11 +36,20 @@ def index(request):
 
 @login_required(login_url='/')
 def home(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/')
     sent = dbgate.get_all_sent_files(request.user)
     received = dbgate.get_all_received_files(request.user)
-    return render(request, 'home.html', {'username': request.user.first_name,
-            'sent_files': sent, 'received_files': received,
-            'no_of_files_sent': len(sent), 'no_of_files_received': len(received)})
+    edited = dbgate.get_all_edited_files();
+    return render(request, 'home.html',
+            {'username': request.user.first_name,
+            'sent_files': sent,
+            'received_files': received,
+            'edited_files': edited,
+            'no_of_files_sent': len(sent),
+            'no_of_files_received': len(received),
+            'no_of_files_edited': edited.count()
+            })
 
 
 class AuthCenter(object):
@@ -50,8 +63,10 @@ class AuthCenter(object):
     @staticmethod
     def register(request):
         if request.user.is_authenticated:
-            return HttpResponse('The User is already logged in... Cant register')
+            return render(request, "oops.html", {'error_code': 201, 'message': 'Someone has already logged in'})
         if request.method == 'POST':
+            if request.user.is_authenticated:
+                return render(request, "oops.html", {'error_code': 201, 'message': 'Someone has already logged in'})
             # create a form instance and populate it with data from the request:
             form = RegisterForm(request.POST)
             # check whether it's valid:
@@ -61,10 +76,12 @@ class AuthCenter(object):
                     user = auth.register_user(get('firstname'), get('lastname'), get('email'), get("password"))
                     messages.success(request, "A new user has been registered")
                     return render(request, 'info.html', {'message': 'An email has been sent to your account please verify it'})
+                    #auth.login(request, user)
+                    #return HttpResponseRedirect('/home')
                 return render(request, 'oops.html', {'error_code': 100, 'message': 'account already exitst'})
             else:
                 return HttpResponse('Invalid form submitted')
-        return HttpResponse('Invalid method for sensitive information')
+        return HttpResponseRedirect("/")
 
     @staticmethod
     def login(request):
@@ -117,7 +134,8 @@ class AuthCenter(object):
 
     @staticmethod
     def does_user_exist(request):
-        if auth.does_account_exist(request.GET['email']):
+        first_check = User.objects.filter(email=request.GET['email']).exists()
+        if first_check or auth.does_account_exist(request.GET['email']):
             return HttpResponse(json.dumps({'status': -1, 'message': 'Account already exitst'}))
         return HttpResponse(json.dumps({'status': 1, 'message': 'None'}))
     
@@ -127,11 +145,14 @@ class AuthCenter(object):
         password = request.POST.get('password') or request.GET.get('password')
         if request.user.is_authenticated:
             return HttpResponse(json.dumps({'status': -1, 'message': 'User already logged'}))
-        if not (password or email):
+        if password == "" or email == "":
             return HttpResponse(json.dumps({'status': -1, 'message': 'Empty details entered'}))
         if auth.authenticate_user(email, password):
             return HttpResponse(json.dumps({'status': 1, 'message': 'successful'}))
-        return HttpResponse(json.dumps({'status': -1, 'message': 'Please check if your entered correct credentials'}))
+        first_check = User.objects.filter(email=email).exists()
+        if first_check:
+            return HttpResponse(json.dumps({'status': -1, 'message': 'user not register'}))
+        return HttpResponse(json.dumps({'status': -1, 'message': 'Please sign up first'}))
 
     @staticmethod
     def change_password(request):
@@ -184,7 +205,8 @@ class FileSharingCenter(object):
             content = request.POST.get('content')
             filename = request.POST.get('filename')
             to = request.POST.get('to')
-            dbgate.upload_file(request.user, to, filename, content)
+            file, _ = dbgate.upload_file(request.user, to, filename, content)
+            dbgate.add_notification(file, "%s has sent a file to %s" % (request.user.first_name, to))
         return HttpResponse("form")
 
     @staticmethod
@@ -192,8 +214,11 @@ class FileSharingCenter(object):
     def delete_file(request):
         oid = request.GET.get('uid')
         section = request.GET.get('section')
-        dbgate.delete_file(oid, section)
-        return HttpResponse({'{"success": true}'})
+        if oid and section:
+            name = dbgate.delete_file(oid, section)
+            dbgate.add_notification(None, "%s file has been deleted by %s" % (name, request.user.first_name))
+            return HttpJsonResponse({"success": True})
+        return HttpJsonResponse({"success": False})
     
     @staticmethod
     @login_required(login_url='/')
@@ -213,10 +238,17 @@ class FileSharingCenter(object):
             obj = models.SentFiles.objects.get(pk=int(oid)).file
             file = obj.file_content
             uid = obj.pk
-        else:
+        elif section == "received":
             obj = models.CentralFileStore.objects.get(pk=int(oid))
             file = obj.file_content
             uid = obj.pk
+        else:
+            obj = models.EditedFiles.objects.get(pk=int(oid))
+            file = obj.file_content
+            uid = obj.pk
+            dbgate.add_notification(None, "%s has viewed %s for editing" % (request.user.first_name, obj.file_name))
+            return render(request, "edit_view.html", {'username': request.user.first_name, 'code': file, 'file_id': uid})
+        dbgate.add_notification(None, "%s has viewed %s for editing" % (request.user.first_name, obj.file_name))
         return render(request, "edit.html", {'username': request.user.first_name, 'code': file, 'file_id': uid})
 
     @staticmethod
@@ -237,4 +269,22 @@ class FileSharingCenter(object):
         status = {'content': ''}
         if obj:
             status['content'] = obj.file_content
-        return HttpResponse(json.dumps(status))
+        return HttpJsonResponse(status)
+
+    @staticmethod
+    @login_required(login_url='/')
+    def hard_edit(request):
+        uid = request.POST.get('uid')
+        content = request.POST.get('content')
+        lobby = request.POST.get('lobby')
+        if uid and content:
+            dbgate.hard_file_update(int(uid), str(content), request.user, lobby)
+            dbgate.add_notification(None, "%s has been edited by %s" % (obj.file_name, request.user.first_name))
+            return HttpJsonResponse({'success': True})
+        return HttpJsonResponse({'success': False})
+
+    @staticmethod
+    @login_required(login_url='/')
+    def get_notifications(request):
+        notifications = dbgate.read_notifications()
+        return HttpJsonResponse({'any': dbgate.is_there_notifications(), 'notifications': notifications})

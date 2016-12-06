@@ -18,11 +18,14 @@ procceding with registration
 */
 function validateRegisterForm() {
   var email = document.forms["registerForm"]["email"].value;
+
   var returnvalue = true;
+
   if (document.forms["registerForm"]["p2"].value == document.forms["registerForm"]["password"].value) {
     var fetch = url_fetch("/does_user_exist?email=" + email, function (data) {
       if (data.status == 200) {
         var response = JSON.parse(data.response);
+        console.info(response);
         if (response['status'] != 1) {
           alert("Email account already exists");
           returnvalue = false;
@@ -31,6 +34,11 @@ function validateRegisterForm() {
     }, method = "GET");
     fetch.send();
     return returnvalue;
+  }
+  else
+  {
+    console.info("Sizwe");
+    alert("passwords don't match");
   }
   return false;
 }
