@@ -13,6 +13,6 @@ Instructions:
     - to run the server run `python manage.py runserver` or `manage.py runserver`
     - to use mysql database edit `sharepoint/settings.py` and highlight line `81 to 86` then unhighlight line `89 to 98`
     - to view the admin page visit `http://localhost:8000/admin` then authenticate a super user you created
-
+	- https://procurement-sharepoint.herokuapp.com
 Help:
 Contact Sizwe: 0767628015, smamba@student.42.fr
